@@ -22,9 +22,10 @@ export default defineNuxtConfig({
   runtimeConfig: {
     // Private keys (only available on server-side)
     modelsDir: "files",
-    baseUrl: "http://localhost:3000",
     // Public keys (exposed to client-side)
-    public: {},
+    public: {
+      baseUrl: "http://localhost:3000",
+    },
   },
   basicAuth: {
     enabled: true,

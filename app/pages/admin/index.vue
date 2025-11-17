@@ -7,6 +7,25 @@
       <p class="text-lg text-muted mb-6">
         Choose your model to start building day by day!
       </p>
+      <div class="mb-6">
+        <UCard>
+          <div class="flex items-center justify-between gap-4">
+            <div class="text-sm">
+              <span class="text-muted">Base URL:</span>
+              <code class="ml-2 px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded">{{ baseUrl }}</code>
+            </div>
+            <UButton
+              @click="regenerateAllQRCodes"
+              :disabled="isRegeneratingAll"
+              color="warning"
+              variant="outline"
+              leading-icon="i-heroicons-arrow-path"
+            >
+              {{ isRegeneratingAll ? "Regenerating..." : "Regenerate All QR Codes" }}
+            </UButton>
+          </div>
+        </UCard>
+      </div>
       <UButton
         @click="isUploadModalOpen = true"
         color="primary"
@@ -134,9 +153,14 @@ definePageMeta({
   middleware: "admin-auth",
 });
 
+// Get runtime config
+const config = useRuntimeConfig();
+const baseUrl = computed(() => config.public.baseUrl);
+
 // Reactive state
 const models = ref([]);
 const isDeleting = ref(false);
+const isRegeneratingAll = ref(false);
 const isUploadModalOpen = ref(false);
 const isUploading = ref(false);
 const isCheckingName = ref(false);
@@ -294,6 +318,50 @@ async function onSubmit() {
     });
   } finally {
     isUploading.value = false;
+  }
+}
+
+async function regenerateAllQRCodes() {
+  const toast = useToast();
+  isRegeneratingAll.value = true;
+
+  try {
+    const results = await Promise.allSettled(
+      models.value.map((model) =>
+        $fetch(`/api/models/${model.name}/regenerate-qr-codes`, {
+          method: "POST",
+        })
+      )
+    );
+
+    const successful = results.filter((r) => r.status === "fulfilled").length;
+    const failed = results.filter((r) => r.status === "rejected").length;
+
+    if (failed === 0) {
+      toast.add({
+        title: "Success!",
+        description: `QR codes for all ${successful} model(s) regenerated successfully`,
+        color: "success",
+        icon: "i-heroicons-check-circle",
+      });
+    } else {
+      toast.add({
+        title: "Partial Success",
+        description: `Regenerated QR codes for ${successful} model(s), ${failed} failed`,
+        color: "warning",
+        icon: "i-heroicons-exclamation-triangle",
+      });
+    }
+  } catch (error) {
+    console.error("Error regenerating QR codes:", error);
+    toast.add({
+      title: "Regeneration Failed",
+      description: "Failed to regenerate QR codes. Please try again.",
+      color: "error",
+      icon: "i-heroicons-exclamation-triangle",
+    });
+  } finally {
+    isRegeneratingAll.value = false;
   }
 }
 

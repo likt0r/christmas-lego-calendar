@@ -105,7 +105,7 @@ export default defineEventHandler(async (event) => {
       const pdfFiles = files.filter(
         (file) => file.startsWith("day-") && file.endsWith(".pdf")
       );
-      
+
       // Extract day numbers from filenames
       const dayNumbers = pdfFiles
         .map((file) => {
@@ -123,13 +123,13 @@ export default defineEventHandler(async (event) => {
         const randomId = generateRandomId();
         tokenMappings[randomId] = { day };
       }
-      
+
       // Save tokens to file
       const tokensFile = { tokens: tokenMappings };
       await writeTokens(config.modelsDir, modelName, tokensFile);
 
       // Generate QR codes with token mappings using baseUrl from runtime config
-      const baseUrl = config.baseUrl || "http://localhost:3000";
+      const baseUrl = config.public.baseUrl || "http://localhost:3000";
       await generateQRCodePDF(
         modelName,
         baseUrl,
@@ -149,7 +149,10 @@ export default defineEventHandler(async (event) => {
           await rm(modelDir, { recursive: true, force: true });
           console.log(`Cleaned up model directory: ${modelDir}`);
         } catch (cleanupError) {
-          console.error(`Failed to cleanup model directory ${modelDir}:`, cleanupError);
+          console.error(
+            `Failed to cleanup model directory ${modelDir}:`,
+            cleanupError
+          );
         }
       }
 
@@ -157,12 +160,13 @@ export default defineEventHandler(async (event) => {
       if (error.statusCode) {
         throw error;
       }
-      
+
       // Extract error message from Error instances
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+
       console.error("Error uploading model:", errorMessage);
-      
+
       // Return the specific error message to the client
       throw createError({
         statusCode: 500,
@@ -175,12 +179,12 @@ export default defineEventHandler(async (event) => {
     if (error.statusCode) {
       throw error;
     }
-    
+
     // Extract error message from Error instances
     const errorMessage = error instanceof Error ? error.message : String(error);
-    
+
     console.error("Error uploading model:", errorMessage);
-    
+
     // Return the specific error message to the client
     throw createError({
       statusCode: 500,
