@@ -1,0 +1,32 @@
+services:
+  app:
+    image: ghcr.io/likt0r/christmas-lego-calendar:latest
+    container_name: dezember-kalender
+    ports:
+      - "3000:3000"
+    environment:
+      # Nuxt Runtime Configuration
+      - NUXT_BASE_URL=${NUXT_BASE_URL:-http://localhost:3000}
+      - NUXT_MODELS_DIR=${NUXT_MODELS_DIR:-files}
+      # Node Environment
+      - NODE_ENV=production
+      - NITRO_PRESET=node-server
+    volumes:
+      # Persist model files and data
+      - models:/app/files
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://localhost:3000/', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  models:
