@@ -8,6 +8,7 @@ services:
       # Nuxt Runtime Configuration
       - NUXT_BASE_URL=${NUXT_BASE_URL:-http://localhost:3000}
       - NUXT_MODELS_DIR=${NUXT_MODELS_DIR:-files}
+      - NUXT_BASIC_AUTH_USERS=${NUXT_BASIC_AUTH_USERS:-admin:admin}
       # Node Environment
       - NODE_ENV=production
       - NITRO_PRESET=node-server

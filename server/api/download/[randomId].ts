@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Validate randomId format (64 hex characters)
-  if (!/^[a-f0-9]{64}$/i.test(randomId)) {
+  if (!/^[a-f0-9]{32}$/i.test(randomId)) {
     throw createError({
       statusCode: 400,
       statusMessage: "Invalid random ID format",
@@ -37,12 +37,7 @@ export default defineEventHandler(async (event) => {
     const { model, day } = tokenInfo;
 
     // Construct file path
-    const filePath = join(
-      process.cwd(),
-      modelsDir,
-      model,
-      `day-${day}.pdf`
-    );
+    const filePath = join(process.cwd(), modelsDir, model, `day-${day}.pdf`);
 
     // Read the PDF file
     const pdfBuffer = await readFile(filePath);
@@ -70,4 +65,3 @@ export default defineEventHandler(async (event) => {
     });
   }
 });
-

@@ -90,6 +90,7 @@ services:
       - "3000:3000"
     environment:
       - NUXT_BASE_URL=https://your-domain.com
+      - NUXT_BASIC_AUTH_USERS=admin:abcd1234!D
     volumes:
       - ./files:/app/files
 ```
@@ -190,6 +191,7 @@ You can override configuration using environment variables:
 
 - `NUXT_BASE_URL` - Override baseUrl
 - `NUXT_MODELS_DIR` - Override modelsDir
+- `NUXT_BASIC_AUTH_USERS` - Override basic auth users (format: `username:password`, e.g., `NUXT_BASIC_AUTH_USERS=admin:abcd1234!D`)
 
 ## Development
 
