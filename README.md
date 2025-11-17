@@ -267,4 +267,4 @@ Images are available at: `ghcr.io/likt0r/christmas-lego-calendar`
 
 ## License
 
-Private project
+MIT License - see [LICENSE](LICENSE) file for details.

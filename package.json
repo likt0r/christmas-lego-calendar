@@ -2,7 +2,7 @@
   "name": "christmas-lego-calendar",
   "version": "1.0.0",
   "type": "module",
-  "private": true,
+  "license": "MIT",
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
