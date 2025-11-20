@@ -115,7 +115,7 @@ export async function generateQRCodePDF(
       }
 
       // Generate QR code data with secure download URL
-      const qrData = `${modelInitial}-${day}:${baseUrl}/api/download/${randomId}`;
+      const qrData = `${baseUrl}/api/download/${randomId}`;
       console.log(`Generating QR code for day ${day}: ${qrData}`);
 
       // Generate QR code
