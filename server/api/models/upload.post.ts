@@ -106,6 +106,12 @@ export default defineEventHandler(async (event) => {
         (file) => file.startsWith("day-") && file.endsWith(".pdf")
       );
 
+      if (pdfFiles.length === 0) {
+        throw new Error(
+          "No daily PDF files were generated. Please check your CSV format."
+        );
+      }
+
       // Extract day numbers from filenames
       const dayNumbers = pdfFiles
         .map((file) => {
