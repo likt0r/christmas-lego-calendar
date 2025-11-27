@@ -141,6 +141,54 @@
       </template>
     </UModal>
 
+    <!-- Delete Confirmation Modal -->
+    <UModal
+      v-model:open="isDeleteModalOpen"
+      title="Delete Model"
+    >
+      <template #body>
+        <div class="space-y-4">
+          <UAlert
+            color="error"
+            variant="soft"
+            title="Warning: This action cannot be undone!"
+            description="All files associated with this model will be permanently deleted."
+            icon="i-heroicons-exclamation-triangle"
+          />
+          
+          <div>
+            <p class="text-sm text-muted mb-2">
+              You are about to delete the model: <strong class="text-highlighted">{{ modelToDelete }}</strong>
+            </p>
+            <p class="text-sm text-muted mb-4">
+              To confirm, please type <code class="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded font-mono">DELETE</code> below:
+            </p>
+            <UInput
+              v-model="deleteConfirmationText"
+              placeholder="Type DELETE to confirm"
+              @keyup.enter="confirmDelete"
+            />
+          </div>
+        </div>
+      </template>
+
+      <template #footer="{ close }">
+        <div class="flex justify-end gap-3">
+          <UButton @click="cancelDelete(close)" variant="outline" :disabled="isDeleting">
+            Cancel
+          </UButton>
+          <UButton
+            @click="confirmDelete"
+            :loading="isDeleting"
+            :disabled="deleteConfirmationText !== 'DELETE'"
+            color="error"
+          >
+            {{ isDeleting ? "Deleting..." : "Delete Model" }}
+          </UButton>
+        </div>
+      </template>
+    </UModal>
+
     <!-- Success/Error Alerts -->
     <UToaster />
   </UContainer>
@@ -167,6 +215,9 @@ const isUploading = ref(false);
 const isCheckingName = ref(false);
 const nameCheckResult = ref(null);
 const form = useTemplateRef("form");
+const isDeleteModalOpen = ref(false);
+const modelToDelete = ref("");
+const deleteConfirmationText = ref("");
 
 // Form state
 const formState = reactive({
@@ -367,7 +418,26 @@ async function regenerateAllQRCodes() {
 }
 
 async function deleteModel(modelName) {
+  // Open confirmation modal
+  modelToDelete.value = modelName;
+  deleteConfirmationText.value = "";
+  isDeleteModalOpen.value = true;
+}
+
+function cancelDelete(close) {
+  close();
+  modelToDelete.value = "";
+  deleteConfirmationText.value = "";
+}
+
+async function confirmDelete() {
+  if (deleteConfirmationText.value !== "DELETE") {
+    return;
+  }
+
+  const modelName = modelToDelete.value;
   const toast = useToast();
+  isDeleting.value = true;
 
   try {
     await $fetch(`/api/models/${modelName}/delete`, {
@@ -381,6 +451,11 @@ async function deleteModel(modelName) {
       icon: "i-heroicons-check-circle",
     });
 
+    // Close modal and reset state
+    isDeleteModalOpen.value = false;
+    modelToDelete.value = "";
+    deleteConfirmationText.value = "";
+
     await loadModels();
   } catch (error) {
     console.error("Error deleting model:", error);
@@ -390,6 +465,8 @@ async function deleteModel(modelName) {
       color: "error",
       icon: "i-heroicons-exclamation-triangle",
     });
+  } finally {
+    isDeleting.value = false;
   }
 }
 
