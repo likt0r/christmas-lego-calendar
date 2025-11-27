@@ -60,6 +60,7 @@
         :is-deleting="isDeleting"
         @download-qr="downloadQRCodes"
         @view-days="navigateToModel"
+        @download-pdf="downloadPDFBackup"
         @delete="deleteModel"
       />
     </div>
@@ -394,6 +395,10 @@ async function deleteModel(modelName) {
 
 function downloadQRCodes(modelName) {
   window.open(`/api/models/${modelName}/qr-codes`, "_blank");
+}
+
+function downloadPDFBackup(modelName) {
+  window.open(`/api/models/${modelName}/pdf-backup`, "_blank");
 }
 
 function navigateToModel(modelName) {

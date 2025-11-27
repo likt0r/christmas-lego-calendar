@@ -31,6 +31,16 @@
       </UButton>
 
       <UButton
+        @click="$emit('download-pdf', model.name)"
+        color="primary"
+        variant="outline"
+        block
+        leading-icon="i-heroicons-document-arrow-down"
+      >
+        Download PDF Backup
+      </UButton>
+
+      <UButton
         @click="$emit('delete', model.name)"
         :disabled="isDeleting"
         color="error"
@@ -63,5 +73,5 @@ defineProps({
   },
 });
 
-defineEmits(["download-qr", "view-days", "delete"]);
+defineEmits(["download-qr", "view-days", "download-pdf", "delete"]);
 </script>
