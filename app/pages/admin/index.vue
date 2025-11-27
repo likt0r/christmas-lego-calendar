@@ -15,7 +15,7 @@
               <code class="ml-2 px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded">{{ baseUrl }}</code>
             </div>
             <UButton
-              @click="regenerateAllQRCodes"
+              @click="isRegenerateModalOpen = true"
               :disabled="isRegeneratingAll"
               color="warning"
               variant="outline"
@@ -189,6 +189,54 @@
       </template>
     </UModal>
 
+    <!-- Regenerate QR Codes Confirmation Modal -->
+    <UModal
+      v-model:open="isRegenerateModalOpen"
+      title="Regenerate All QR Codes"
+    >
+      <template #body>
+        <div class="space-y-4">
+          <UAlert
+            color="warning"
+            variant="soft"
+            title="This will regenerate QR codes for all models"
+            icon="i-heroicons-information-circle"
+          />
+          
+          <div class="space-y-3">
+            <p class="text-sm text-highlighted font-semibold">
+              What will happen:
+            </p>
+            <ul class="text-sm text-muted space-y-2 list-disc list-inside">
+              <li>New secure download tokens will be generated for each day of every model</li>
+              <li>All existing QR codes will be invalidated and replaced</li>
+              <li>New QR code PDFs will be created with updated links</li>
+              <li>Any printed QR codes will need to be replaced</li>
+            </ul>
+            
+            <p class="text-sm text-muted mt-4">
+              <strong>Use this when:</strong> You've changed the base URL or need to invalidate old QR codes for security reasons.
+            </p>
+          </div>
+        </div>
+      </template>
+
+      <template #footer="{ close }">
+        <div class="flex justify-end gap-3">
+          <UButton @click="close()" variant="outline" :disabled="isRegeneratingAll">
+            Cancel
+          </UButton>
+          <UButton
+            @click="confirmRegenerateAll(close)"
+            :loading="isRegeneratingAll"
+            color="warning"
+          >
+            {{ isRegeneratingAll ? "Regenerating..." : "Regenerate All" }}
+          </UButton>
+        </div>
+      </template>
+    </UModal>
+
     <!-- Success/Error Alerts -->
     <UToaster />
   </UContainer>
@@ -218,6 +266,7 @@ const form = useTemplateRef("form");
 const isDeleteModalOpen = ref(false);
 const modelToDelete = ref("");
 const deleteConfirmationText = ref("");
+const isRegenerateModalOpen = ref(false);
 
 // Form state
 const formState = reactive({
@@ -371,6 +420,11 @@ async function onSubmit() {
   } finally {
     isUploading.value = false;
   }
+}
+
+async function confirmRegenerateAll(close) {
+  close();
+  await regenerateAllQRCodes();
 }
 
 async function regenerateAllQRCodes() {
