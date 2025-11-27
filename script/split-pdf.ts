@@ -8,8 +8,8 @@ import { createReadStream } from "fs";
 
 interface DayData {
   day: number;
-  stepStart: number;
-  stepEnd: number;
+  stepStart: string;
+  stepEnd: string;
   pageStart: number;
   pageEnd: number;
 }
@@ -28,7 +28,7 @@ async function parseCSV(csvPath: string): Promise<DayData[]> {
     const results: DayData[] = [];
 
     createReadStream(csvPath)
-      .pipe(csv())
+      .pipe(csv({ mapHeaders: ({ header }) => header.trim() }))
       .on("data", (data) => {
         // Skip rows without valid day number
         const day = parseInt(data.day);
@@ -37,23 +37,21 @@ async function parseCSV(csvPath: string): Promise<DayData[]> {
         }
 
         // Validate that required fields are present and valid
-        const stepStart = parseInt(data.step_start);
-        const stepEnd = parseInt(data.step_end);
+        // Steps can be alphanumeric (e.g. "A1")
+        const stepStart = data.step_start?.trim() || "";
+        const stepEnd = data.step_end?.trim() || "";
+
         const pageStart = parseInt(data.page_start);
         const pageEnd = parseInt(data.page_end);
 
-        // Skip rows with invalid numeric values
-        if (
-          isNaN(stepStart) ||
-          isNaN(stepEnd) ||
-          isNaN(pageStart) ||
-          isNaN(pageEnd)
-        ) {
-          return; // Skip rows with invalid data
+        // Skip rows with invalid page numbers
+        if (isNaN(pageStart) || isNaN(pageEnd)) {
+          console.warn(`Skipping day ${day}: Invalid page numbers`);
+          return;
         }
 
         const dayData: DayData = {
-          day: day, // Use the day column from CSV
+          day: day,
           stepStart: stepStart,
           stepEnd: stepEnd,
           pageStart: pageStart,
@@ -87,6 +85,10 @@ export async function splitPDF(
     console.log("📊 Parsing CSV...");
     const dayData = await parseCSV(csvPath);
     console.log(`Found ${dayData.length} days in CSV`);
+
+    if (dayData.length === 0) {
+      throw new Error("No valid days found in CSV file. Please check the format.");
+    }
 
     // Validate CSV data
     for (const day of dayData) {
